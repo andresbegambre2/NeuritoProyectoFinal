@@ -1,50 +1,60 @@
 # NeuroEcosistema Neurito
 
-Simulador 2D de presas y depredadores con dos redes neuronales multicapa entrenadas por aprendizaje supervisado. Reutiliza conceptos y código de clase: perceptrones multicapa implementados con NumPy, activaciones ReLU/Softmax, retropropagación, Pygame y experimentos reproducibles.
+Simulador 2D de presas y depredadores con dos redes neuronales multicapa entrenadas por aprendizaje supervisado. Reutiliza conceptos trabajados en clase: MLP en NumPy, ReLU, Softmax, retropropagación, Pygame y experimentación reproducible.
 
 ## Requisitos y ejecución
 
 - Python 3.12 o superior
 - NumPy 2.x
-- Pygame CE 2.x (solo para la vista)
+- Pygame CE 2.x (para la vista)
 
-En Windows, desde esta carpeta:
+Desde esta carpeta en Windows:
 
 ```powershell
-python -m pip install numpy pygame-ce
-python -m neurito_ecosistema.experimentos
+python -m pip install -r requirements.txt
 python -m neurito_ecosistema.visualizar
 ```
 
-El primer comando de experimentos entrena y guarda pesos en `modelos/`, y deja los datos en `evidencia/`. La vista crea los modelos si todavía no existen.
+La vista carga los modelos ya incluidos. Para volver a entrenar los modelos y regenerar los experimentos:
 
-## Diseño
+```powershell
+python -m neurito_ecosistema.experimentos
+```
 
-El mundo es una cuadrícula 24×24. Las presas buscan alimento, evitan depredadores y pierden energía; los depredadores persiguen presas, pierden energía y recuperan energía al capturarlas. Hay tres escenarios: abundancia, escasez y presión (más depredadores y obstáculos).
+## Diseño del ecosistema
 
-Cada especie usa una MLP 6→32→24→9 con ReLU en capas ocultas y Softmax en la salida. Las seis entradas codifican dirección unitaria al objetivo primario, dirección secundaria (amenaza para presa o comida para depredador), energía y disponibilidad de objetivo. Las nueve salidas son los ocho movimientos y quedarse quieto. La decisión de movimiento se toma mediante argmax de la salida neuronal.
+El tablero es una cuadrícula de 24×24 con 12 presas iniciales. Hay tres escenarios: abundancia (22 alimentos, 2 depredadores, sin obstáculos), escasez (7 alimentos, 2 depredadores) y presión (16 alimentos, 5 depredadores y 18 obstáculos). El alimento se regenera; los agentes consumen energía y la recuperan al comer o capturar. Los episodios terminan si se extingue una especie o al alcanzar el límite de 250 pasos.
 
-El entrenamiento es supervisado: un experto vectorial genera etiquetas, y la red aprende a imitarlo mediante entropía cruzada y descenso de gradiente por mini lotes. Las reglas expertas son referencia y fuente de etiquetas, no sustituyen las decisiones neuronales en la política entrenada. El alcance no es aprendizaje por refuerzo ni evolución.
+Cada especie usa una MLP 6→32→24→9, con dos capas ocultas ReLU y salida Softmax. Las entradas codifican direcciones al objetivo principal y secundario, energía y disponibilidad del objetivo. Las salidas representan ocho movimientos posibles y quedarse quieto. En la política neuronal, la acción se escoge con el valor más alto de salida de la red.
+
+El entrenamiento es supervisado por imitación: una regla vectorial genera etiquetas y la red aprende con entropía cruzada y retropropagación por mini lotes. No es aprendizaje por refuerzo. La política de reglas es tanto referencia como fuente de las etiquetas; la aleatoria es una referencia independiente.
 
 ## Experimentos reproducibles
 
-`experimentos.py` corre 10 semillas por escenario y compara red entrenada, red sin entrenar, política experta de reglas y política aleatoria (120 episodios). Registra supervivientes, alimento consumido, capturas, energía media y tiempo hasta primera captura. Incluye desviación estándar de las métricas y una comparación 16–12 frente a 32–24 neuronas ocultas en `modelos/training_summary.json`. También registra pérdida y precisión antes/después del entrenamiento sobre una partición de prueba. Semilla de generación/entrenamiento: 42; semillas de episodio: 1000–1009; horizonte: 250 pasos.
+Se comparan cuatro políticas: red entrenada, la misma red antes del entrenamiento, reglas y movimiento aleatorio. Hay 3 escenarios × 4 políticas × 30 semillas = **360 episodios**. Las semillas 1000–1029 emparejan las posiciones iniciales entre políticas. Cada episodio dura hasta 250 pasos o termina por extinción de una especie.
 
-Los resultados son descriptivos de este modelo y estas semillas. Las etiquetas derivadas de una regla no constituyen evidencia de que la red haya aprendido una estrategia mejor que esa regla; la comparación conductual con líneas base permite ver cuándo se aproxima y dónde falla.
+Se registran supervivientes, alimento consumido, capturas, energía final de presas y depredadores, duración, motivo de terminación y tiempo hasta la primera captura. Para el tiempo a la primera captura, los promedios consideran solo episodios donde ocurrió al menos una captura; en los demás queda vacío, no cero. Los CSV contienen resultados por episodio, promedios y desviaciones estándar.
 
-## Vista
+La comparación de arquitecturas (16–12 y 32–24 neuronas ocultas) usa los mismos datos, semillas, tasa y épocas. Los resultados son descriptivos de este modelo y estas semillas. Alta exactitud al imitar reglas no demuestra por sí sola un mejor desempeño ecológico.
 
-`visualizar.py` abre Pygame. ESPACIO inicia/pausa; flecha derecha avanza un paso; N cambia escenario; P alterna política neuronal, aleatoria y reglas; R reinicia; ESC cierra. El panel muestra poblaciones, consumo, capturas, energía y una decisión neuronal de muestra.
+## Vista interactiva
 
-## Archivos
+`visualizar.py` abre Pygame. ESPACIO inicia o pausa; flecha derecha avanza un paso pausado; N cambia escenario; P alterna entre política neuronal, aleatoria y reglas; R reinicia la misma semilla; ESC sale. El panel muestra las poblaciones, alimento consumido, capturas, energía de presas y estado de episodio.
+
+## Archivos de entrega
 
 - `neurito_ecosistema/`: entorno, MLP, entrenamiento, experimentos y vista.
-- `modelos/`: pesos entrenados reproducibles.
-- `evidencia/`: datos por episodio y resúmenes generados.
-- `INFORME_TECNICO.docx` y `INFORME_TECNICO.pdf`: informe listo para revisar o entregar.\n- `INFORME_TECNICO.md`: fuente editable del informe.
+- `modelos/`: pesos entrenados y resumen del entrenamiento.
+- `evidencia/`: episodios individuales y resúmenes experimentales.
+- `INFORME_TECNICO.docx` y `INFORME_TECNICO.pdf`: informe.
+- `INFORME_TECNICO.md`: fuente editable del informe.
 - `BITACORA_DECISIONES.md`: decisiones justificadas.
+- `AUDITORIA_PROPUESTA.md`: revisión requisito por requisito y puntos pendientes para la sustentación.
+- `INICIAR_SIMULACION.bat` y `GENERAR_EVIDENCIA.bat`: accesos rápidos para Windows.
 
 ## Uso de IA
 
-Se utilizó un asistente de programación para estructurar y redactar componentes. El equipo debe revisar el código, ejecutar los experimentos, comprender la retropropagación y declarar qué cambios aceptó o rechazó antes de la sustentación.
+Se utilizó un asistente de programación para apoyar la implementación y la documentación. El equipo debe comprender, verificar y declarar qué herramientas empleó, qué recomendaciones aceptó y qué validaciones realizó.
+
+
 

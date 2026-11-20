@@ -29,9 +29,10 @@ def expert_label(x,kind):
     return int(np.argmax(score))
 
 class World:
-    def __init__(self,seed,scenario='abundancia',size=24):
+    def __init__(self,seed,scenario='abundancia',size=24,max_steps=250):
         self.rng=np.random.default_rng(seed); self.size=size; self.cfg=ESCENARIOS[scenario]
         self.obstacles=set(); self.food=set(); self.prey={}; self.predators={}; self.captures=0; self.consumed=0; self.tick=0; self.first_capture=None
+        self.max_steps=max_steps; self.termination_reason=None
         cells=[(x,y) for x in range(size) for y in range(size)]
         self.obstacles=set()
         for i in self.rng.choice(len(cells),size=self.cfg['obstacles'],replace=False): self.obstacles.add(cells[int(i)])
@@ -49,6 +50,8 @@ class World:
         return min(targets,key=lambda p:abs(pos[0]-p[0])+abs(pos[1]-p[1]))
     def step(self,policies,steps=1):
         for _ in range(steps):
+            if self.termination_reason is not None:
+                break
             self.tick+=1
             for kind,pop in [('prey',self.prey),('predator',self.predators)]:
                 updated={}
@@ -68,7 +71,13 @@ class World:
             if self.rng.random()<0.25:
                 p=self._empty_positions(1)
                 if p:self.food.add(p[0])
-        return {'survivors':len(self.prey),'predators_alive':len(self.predators),'food_eaten':self.consumed,'captures':self.captures,'time_to_first_capture':self.first_capture if self.first_capture is not None else 0,'prey_energy':float(np.mean(list(self.prey.values()))) if self.prey else 0.,'steps':steps}
+            if not self.prey:
+                self.termination_reason='extincion_presas'
+            elif not self.predators:
+                self.termination_reason='extincion_depredadores'
+            elif self.tick>=self.max_steps:
+                self.termination_reason='limite_de_pasos'
+        return {'survivors':len(self.prey),'predators_alive':len(self.predators),'food_eaten':self.consumed,'captures':self.captures,'time_to_first_capture':self.first_capture,'prey_energy':float(np.mean(list(self.prey.values()))) if self.prey else 0.,'predator_energy':float(np.mean(list(self.predators.values()))) if self.predators else 0.,'steps':self.tick,'termination_reason':self.termination_reason or 'en_curso'}
 
 def policy_from_model(model,kind):
     return lambda X:model.predict(X)

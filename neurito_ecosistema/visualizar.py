@@ -1,5 +1,4 @@
 """Vista interactiva Pygame para inspeccionar decisiones y variables del ecosistema."""
-import sys,random
 from pathlib import Path
 import pygame
 from .ecosistema import ESCENARIOS,World,features
@@ -14,7 +13,7 @@ def main():
     nets={'prey':load_model(models/'prey_model.npz'),'predator':load_model(models/'predator_model.npz')}
     pygame.init(); screen=pygame.display.set_mode((PAD*2+24*CELL+SIDE,PAD*2+24*CELL));pygame.display.set_caption('Neurito | NeuroEcosistema')
     font=pygame.font.SysFont('segoeui',17);small=pygame.font.SysFont('segoeui',14)
-    scenario='abundancia'; policy_name='Neuronal'; world=World(2026,scenario);tick=0;paused=True;selected=None
+    scenario='abundancia'; policy_name='Neuronal'; world=World(2026,scenario);tick=0;paused=True
     clock=pygame.time.Clock(); running=True
     def policies():
         if policy_name=='Aleatoria':
@@ -40,7 +39,7 @@ def main():
         for (x,y),energy in world.predators.items():pygame.draw.circle(screen,(245,89,83),(ox+x*CELL+CELL//2,oy+y*CELL+CELL//2),max(5,int(9*energy)))
         px=ox+24*CELL+20; y=PAD
         title=font.render('NEURITO · NEUROECOSISTEMA',True,(238,242,248));screen.blit(title,(px,y));y+=38
-        info=[f'Escenario: {scenario}',f'Política: {policy_name}',f'Paso: {tick}',f'Presas vivas: {len(world.prey)}',f'Depredadores: {len(world.predators)}',f'Alimento consumido: {world.consumed}',f'Capturas: {world.captures}',f'Energía media presas: {sum(world.prey.values())/max(1,len(world.prey)):.2f}','', 'ESPACIO iniciar/pausar','→ un paso (pausado)','N cambiar escenario','P alternar política','R reiniciar','ESC salir','','Verde alimento · Azul presa','Rojo depredador · Gris obstáculo']
+        info=[f'Escenario: {scenario}',f'Política: {policy_name}',f'Paso: {tick}/{world.max_steps}',f'Estado: {world.termination_reason or "en curso"}',f'Presas vivas: {len(world.prey)}',f'Depredadores: {len(world.predators)}',f'Alimento consumido: {world.consumed}',f'Capturas: {world.captures}',f'Energía media presas: {sum(world.prey.values())/max(1,len(world.prey)):.2f}','', 'ESPACIO iniciar/pausar','→ un paso (pausado)','N cambiar escenario','P alternar política','R reiniciar','ESC salir','','Verde alimento · Azul presa','Rojo depredador · Gris obstáculo']
         for line in info:screen.blit(small.render(line,True,(211,221,233)),(px,y));y+=23
         if world.prey:
             pos=next(iter(world.prey));x=features(world,'prey',pos,world.prey[pos]);act=int(nets['prey'].predict(x[None,:])[0]); labels=['↖','↑','↗','←','•','→','↙','↓','↘']
