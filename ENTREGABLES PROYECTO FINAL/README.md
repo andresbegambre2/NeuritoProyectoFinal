@@ -1,18 +1,16 @@
-# Entregables del proyecto NeuroEcosistema
+# Entrega final del NeuroEcosistema
 
-Esta carpeta reúne el informe, la bitácora y los datos con los que se pueden revisar las conclusiones. El código de la simulación está en la raíz del repositorio, dentro de `neurito_ecosistema/`; las instrucciones completas están en el `README.md` de la raíz.
+Aquí está el informe final en PDF, la bitácora de decisiones y los archivos para revisar los experimentos. El código y las instrucciones para ejecutar la simulación están en la carpeta principal del repositorio.
 
-## Archivos incluidos
+## Contenido
 
-- `INFORME_TECNICO.docx` y `INFORME_TECNICO.pdf`: informe de cuatro páginas.
-- `INFORME_TECNICO.md`: versión editable del informe.
-- `BITACORA_DECISIONES.md`: nueve decisiones, las alternativas consideradas y su justificación.
-- `AUDITORIA_PROPUESTA.md`: revisión de requisitos y temas que se deben explicar en la sustentación.
-- `evidencia/episodios.csv`: detalle de los 360 episodios.
-- `evidencia/resumen.csv` y `resumen.json`: métricas resumidas y comparaciones.
-- `evidencia/graficas/`: supervivencia por escenario y pérdida durante el entrenamiento.
+- `INFORME_TECNICO.pdf`: informe final (cuatro páginas).
+- `BITACORA_DECISIONES.md`: nueve decisiones del proyecto, con alternativas y razones.
+- `evidencia/episodios.csv`: resultados de los 360 episodios.
+- `evidencia/resumen.csv` y `resumen.json`: promedios y comparaciones.
+- `evidencia/graficas/`: gráficas de supervivencia y entrenamiento.
 - `modelos/`: pesos de las dos redes y resumen del entrenamiento.
 
-Para ejecutar la simulación, abre PowerShell en la raíz del repositorio, instala lo indicado en `requirements.txt` y ejecuta `python -m neurito_ecosistema.visualizar`. En Windows también está el acceso directo `INICIAR_SIMULACION.bat`.
+La política aleatoria dejó más presas vivas en los tres escenarios. El informe explica este resultado, las limitaciones de la comparación y el uso de Codex como apoyo de programación.
 
-El resultado principal es que la red aprendió a imitar la regla experta, aunque la política aleatoria dejó más presas vivas en los tres escenarios. El informe presenta ese resultado sin atribuir a la red una ventaja que las pruebas no mostraron.
+Para ejecutar la aplicación, abre PowerShell en la carpeta principal del repositorio, instala las dependencias de `requirements.txt` y ejecuta `python -m neurito_ecosistema.visualizar`. En Windows también puedes abrir `INICIAR_SIMULACION.bat`.

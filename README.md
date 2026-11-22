@@ -49,7 +49,7 @@ En estos resultados, la política aleatoria dejó más presas vivas en los tres 
 - `neurito_ecosistema/`: simulación, redes, entrenamiento, experimentos y ventana gráfica.
 - `modelos/`: pesos entrenados y resumen del entrenamiento.
 - `evidencia/`: datos de cada episodio, resúmenes y gráficas.
-- `ENTREGABLES PROYECTO FINAL/`: informe, bitácora, auditoría y copia organizada de los resultados.
+- `ENTREGABLES PROYECTO FINAL/`: informe final en PDF, bitácora y evidencia organizada.
 
 El informe tiene cuatro páginas. La bitácora documenta nueve decisiones técnicas. Los CSV permiten consultar los resultados por episodio y sus resúmenes.
 
