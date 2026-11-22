@@ -1,34 +1,32 @@
-# Auditoría de cumplimiento de la propuesta
+# Revisión de requisitos del proyecto
 
-**Documento revisado:** Proyecto Final Integrador NeuroEcosistema – Depredadores y Presas.  
-**Resultado:** la carpeta contiene los productos técnicos y experimentales solicitados. El resultado conductual es negativo para la hipótesis de superioridad neuronal en supervivencia, pero la propuesta permite resultados negativos cuando están reproducidos, medidos e interpretados. La sustentación individual sigue siendo responsabilidad del equipo.
+Revisé los requisitos de la propuesta frente al código, los modelos y la evidencia guardada en este repositorio. El trabajo incluye la simulación, las comparaciones experimentales y un informe con resultados y límites. El resultado que no favorece a la red neuronal también se presenta: la propuesta permite resultados negativos si se explican con datos.
 
-| Requisito del profesor | Evidencia de la entrega | Estado y observación |
+| Lo que pide la propuesta | Dónde se puede revisar | Estado |
 |---|---|---|
-| Simulación 2D con alimento, energía, movimiento, capturas y fin de episodio | `neurito_ecosistema/ecosistema.py`; final por extinción de una especie o límite de 250 pasos | Cumple |
-| Dos especies con objetivos y decisiones diferenciados | Modelos separados; la salida de cada MLP selecciona el movimiento durante la política neuronal | Cumple |
-| MLP por especie con al menos dos capas ocultas | 6→32→24→9, dos capas ocultas ReLU y salida Softmax | Cumple |
-| Entrenamiento real y evidencia de parámetros modificados | Aprendizaje supervisado por imitación; pérdida, exactitud y cambio L2 registrados en `modelos/training_summary.json` | Cumple; las etiquetas son de un experto vectorial y los estados son sintéticos, no aprendizaje por refuerzo |
-| Comparar antes/después del entrenamiento, configuraciones y referencia no neuronal | Informe técnico; red entrenada/sin entrenar, reglas y política aleatoria | Cumple; la comparación de arquitectura se hace sobre exactitud de imitación. El desempeño ecológico de la arquitectura pequeña queda como trabajo futuro |
-| Tres escenarios ambientales requeridos | Abundancia, escasez y presión con más depredadores/obstáculos | Cumple |
-| Repeticiones, semillas y métricas | 30 semillas emparejadas por escenario y política; 360 episodios; CSV por episodio y resumen con desviaciones estándar e IC pareado | Cumple y supera el mínimo de varias ejecuciones |
-| Visualización, estadísticas y consulta de decisiones | Aplicación Pygame con controles, poblaciones, consumo, capturas, energía y decisión neuronal de muestra | Cumple |
-| Reproducibilidad | README, requisitos, semillas, pesos entrenados y scripts de ejecución | Cumple |
-| Justificación de al menos seis decisiones | `BITACORA_DECISIONES.md`, nueve decisiones con alternativas y criterio | Cumple |
-| Informe de máximo diez páginas con análisis experimental | `INFORME_TECNICO.docx` y PDF; preguntas, hipótesis, controles, tablas, interpretaciones y limitaciones | Cumple; 3 páginas, dentro del máximo de 10 |
-| Declaración de uso de IA | Sección en el informe y README | Cumple; el equipo debe explicar qué revisó y validó |
-| Repositorio con código y productos | Repositorio GitHub privado NeuritoProyectoFinal | Cumple; contiene solo la carpeta de entrega del proyecto final |
-| Demostración en vivo y preguntas individuales | Controles de la aplicación y guía del informe | Pendiente de realizar; cada integrante debe poder explicar la red, entrenamiento, métricas y decisiones |
+| Simulación 2D con alimento, energía, movimiento, capturas y fin de episodio | `../neurito_ecosistema/ecosistema.py` | Implementado |
+| Dos especies con objetivos y redes diferenciadas | `../neurito_ecosistema/entrenar.py`; pesos en `../modelos/` | Implementado; cada MLP selecciona acciones durante la política neuronal |
+| Dos capas ocultas como mínimo y entradas/salidas documentadas | Informe técnico y `../neurito_ecosistema/red.py` | Documentado: 6→32→24→9, ReLU y Softmax |
+| Entrenamiento real y cambio de parámetros | `../modelos/training_summary.json` y `.npz` | Registrado con aprendizaje supervisado por imitación |
+| Comparación antes/después, entre configuraciones y frente a una referencia | Informe, `evidencia/resumen.csv`, `evidencia/resumen.json` | Incluida; la comparación de arquitectura mide exactitud de imitación, no rendimiento ecológico |
+| Tres escenarios y varias ejecuciones con semillas | `evidencia/episodios.csv` | 30 semillas por política y escenario, 360 episodios |
+| Métricas y datos que permitan revisar las conclusiones | CSV, JSON y gráficas en `evidencia/` | Incluidos; supervivencia, alimento, capturas, energía, duración y variación |
+| Aplicación visible con controles y variables | `../neurito_ecosistema/visualizar.py` | Andrés confirma que ya la ejecutó en su computador; se debe volver a abrir en el equipo de sustentación |
+| Instrucciones y dependencias | `../README.md` y `../requirements.txt` | Incluidas |
+| Bitácora con seis o más decisiones | `BITACORA_DECISIONES.md` | Incluye nueve decisiones y sus alternativas |
+| Informe de hasta diez páginas con análisis, límites y recomendaciones | `INFORME_TECNICO.docx` y PDF | Incluido; cuatro páginas, dentro del máximo de diez. Se revisó el PDF después de actualizarlo |
+| Declaración de uso de IA, finalidad, decisiones y verificación | Sección 6 del informe | Incluida; leerla antes de entregar y estar preparado para explicar el apoyo recibido |
+| Repositorio con código y productos | Repositorio NeuritoProyectoFinal | Incluido en la carpeta del repositorio |
+| Demostración en vivo y preguntas individuales | Aplicación y sustentación | Pendiente de realizar en clase |
 
-## Conclusión experimental que se debe presentar
+## Resultado que conviene explicar
 
-La red entrenada imita con alta exactitud al experto y produce más capturas, pero en las 30 semillas la política aleatoria deja más presas al final en los tres escenarios. Por tanto, no se debe afirmar que la red mejora la supervivencia. El hallazgo muestra que exactitud de imitación y desempeño ecológico son objetivos distintos. La percepción local omite distancias, densidad y planificación frente a obstáculos; estas son mejoras justificadas por los resultados.
+La red entrenada imita bien la regla experta y produce muchas capturas. Aun así, la política aleatoria terminó con más presas vivas en las tres condiciones. No presento este resultado como una mejora de la red. En cada condición experimental cambié la política de las dos especies a la vez, así que los datos comparan ecosistemas completos y no separan el efecto de la política de presas del efecto de la política de depredadores.
 
-## Preparación pendiente del equipo
+## Aspectos que todavía requieren atención
 
-1. Ejecutar la demostración y explicar los controles.
-2. Cada integrante debe explicar qué son las entradas, salidas, dos capas ocultas, ReLU, Softmax y retropropagación.
-3. Defender por qué se usó imitación supervisada y reconocer lo que los datos sintéticos no demuestran.
-4. Leer el CSV y explicar una diferencia media y su desviación/intervalo.
-5. Declarar con honestidad el apoyo de IA y qué componentes revisó y verificó el equipo.
-
+- La red se entrenó con estados sintéticos y etiquetas creadas por una regla; no aprendió directamente de recompensas del ecosistema.
+- La comparación de las dos arquitecturas mide exactitud de imitación. Su rendimiento ecológico aún no se comparó.
+- No hay en el repositorio una comparación de sensibilidad para justificar los valores de gasto de energía y regeneración frente a otras opciones. Se describen como parámetros usados, no como valores óptimos.
+- La sustentación y las preguntas individuales no se pueden marcar como realizadas hasta que ocurran.
+- La versión final de Word y PDF debe abrirse y revisarse visualmente después de los cambios.

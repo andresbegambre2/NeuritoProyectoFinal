@@ -50,11 +50,9 @@ La comparación de arquitecturas (16–12 y 32–24 neuronas ocultas) usa los mi
 - `INFORME_TECNICO.md`: fuente editable del informe.
 - `BITACORA_DECISIONES.md`: decisiones justificadas.
 - `AUDITORIA_PROPUESTA.md`: revisión requisito por requisito y puntos pendientes para la sustentación.
+- `ENTREGABLES PROYECTO FINAL/`: copia organizada de los documentos y evidencia para revisar o entregar.
 - `INICIAR_SIMULACION.bat` y `GENERAR_EVIDENCIA.bat`: accesos rápidos para Windows.
 
 ## Uso de IA
 
-Se utilizó un asistente de programación para apoyar la implementación y la documentación. El equipo debe comprender, verificar y declarar qué herramientas empleó, qué recomendaciones aceptó y qué validaciones realizó.
-
-
-
+Usé Codex como apoyo para organizar el código, la documentación y el análisis. En el informe explico qué ayuda acepté, qué interpretación no adopté porque los datos no la respaldan y cómo contrasté las cifras con la evidencia guardada.

@@ -1,29 +1,35 @@
-# Informe técnico del NeuroEcosistema
+# Informe técnico NeuroEcosistema: simulación de presas y depredadores
 
-**Universidad Santo Tomás, seccional Tunja · Electiva de Inteligencia Artificial**  
-**Proyecto:** simulación de depredadores y presas  
+**Universidad Santo Tomás, seccional Tunja · Electiva I de Profundización – Inteligencia Artificial**
+
+**Docente:** Diego Alejandro Vela Beltrán
+
+**Autor:** Andrés Leonardo Begambre Vargas
+
+**Proyecto:** simulación de depredadores y presas
+
 **Fecha de generación de evidencia:** 20 de noviembre de 2026
-Se implementó la simulación y se evaluó con 360 episodios reproducibles. Las redes aprendieron a imitar la regla experta, pero la política aleatoria mantuvo más presas vivas en los tres escenarios. Por tanto, los datos no respaldan que la política neuronal mejore la supervivencia; el informe explica este resultado y sus límites.
+En este trabajo construí una simulación de presas y depredadores y la comparé en 360 episodios. La red aprendió a imitar la regla experta. En mis pruebas la política aleatoria dejó más presas vivas. Por eso no concluyo que la red haya mejorado la supervivencia. En este informe explico qué medí, qué encontré y qué aspectos todavía limitan el modelo.
 
 ## 1 Problema y objetivo
 
-Se implementó una simulación 2D donde presas buscan alimento y evitan depredadores, mientras los depredadores persiguen presas y recuperan energía al capturarlas. La pregunta experimental es si agentes con redes neuronales obtienen mejor desempeño que políticas sin aprendizaje en escenarios con recursos suficientes, escasez y presión de depredación/obstáculos.
+Partí de una pregunta concreta: ¿una red neuronal ayuda a que los agentes se comporten mejor que una política aleatoria o una regla fija? Para explorarla, configuré las presas para buscar alimento y evitar amenazas, y los depredadores para perseguir presas y recuperar energía al capturarlas. Medí el comportamiento en condiciones de abundancia, escasez y mayor presión de depredación.
 
 ## 2 Diseño e implementación
 
-El mundo es una cuadrícula de 24×24 con 12 presas iniciales. Los escenarios son: abundancia (22 alimentos, 2 depredadores, sin obstáculos), escasez (7 alimentos, 2 depredadores), y presión (16 alimentos, 5 depredadores y 18 obstáculos). El alimento puede regenerarse. La energía se consume por paso y se recupera al comer o capturar.
+Usé un tablero de 24×24 y cada episodio comienza con 12 presas. Preparé tres condiciones: abundancia, con 22 alimentos y 2 depredadores; escasez, con 7 alimentos y 2 depredadores; y presión, con 16 alimentos, 5 depredadores y 18 obstáculos. El alimento puede reaparecer durante la partida. Las dos poblaciones gastan energía al moverse y la recuperan al comer o capturar.
 
-Cada especie tiene una red neuronal distinta: MLP 6→32→24→9, con dos capas ocultas ReLU y salida Softmax. Sus seis entradas representan vector unitario hacia objetivo principal, vector secundario (amenaza para la presa o alimento para el depredador), energía y disponibilidad de objetivo. Las nueve salidas corresponden a ocho movimientos y quedarse quieto. El movimiento ejecutado proviene del argmax de la red neuronal para los agentes entrenados.
+Implementé una red MLP para cada especie, con arquitectura 6→32→24→9. Tiene dos capas ocultas con activación ReLU y una salida Softmax. Las entradas representan la dirección al objetivo más cercano, una segunda dirección, la energía disponible y si hay objetivo. En las presas, la segunda dirección apunta en sentido contrario al depredador más cercano; en los depredadores, apunta al alimento. La regla de entrenamiento del depredador no usa esa dirección al alimento para crear sus etiquetas, así que esa entrada todavía no guía su aprendizaje. La red elige entre ocho movimientos y quedarse quieta. En la política neuronal, esa salida determina la acción que se ejecuta.
 
-Se usa aprendizaje supervisado por imitación. Un experto vectorial genera etiquetas y la MLP aprende con entropía cruzada, mini lotes y retropropagación. Los pesos cambian durante el entrenamiento; `modelos/*.npz` conserva los pesos finales. No es aprendizaje por refuerzo: la regla experta proporciona los ejemplos. Se compara además una política aleatoria como referencia independiente.
+Entrené las redes por aprendizaje supervisado: una regla vectorial genera ejemplos y la MLP aprende a imitar sus decisiones mediante entropía cruzada y retropropagación por mini lotes. Guardé los pesos finales en `modelos/*.npz`. Este método sí modifica los parámetros, pero no es aprendizaje por refuerzo: la red aprende de la regla experta y no de recompensas obtenidas en el ecosistema.
 
 ## 3 Metodología y controles
 
-Se generaron 12.000 estados sintéticos balanceados entre especies; cada especie tiene 4.800 muestras de entrenamiento y 1.200 de prueba (80/20), con semilla 42. Se entrenó durante 120 épocas, tasa 0,035 y arquitectura 6→32→24→9.
+Para entrenar utilicé 12.000 estados sintéticos, repartidos por igual entre las dos especies. En cada una reservé 4.800 ejemplos para entrenamiento y 1.200 para prueba. Fijé la semilla 42, 120 épocas y una tasa de aprendizaje de 0,035. La partición de prueba permite medir qué tan bien la red imita ejemplos que no vio durante el ajuste.
 
-La evaluación del ecosistema usa 30 semillas (1000–1029) por cada combinación de escenario y política. Son 360 episodios en total: red entrenada, la misma red antes de entrenar, política experta de reglas y política aleatoria. Para cada semilla se compara la misma posición inicial entre políticas. Los episodios terminan cuando se extingue una especie o al llegar al máximo de 250 pasos. `evidencia/episodios.csv` conserva cada episodio; `evidencia/resumen.csv` incluye medias y desviaciones estándar muestrales de supervivencia, consumo, capturas, energías finales y duración. El tiempo hasta la primera captura se promedia solo entre episodios donde hubo capturas; cuando no las hay, el dato queda vacío.
+Probé cuatro políticas en cada escenario: red entrenada, la misma inicialización antes de entrenar, regla experta y movimiento aleatorio. Repetí cada combinación con 30 semillas, de la 1000 a la 1029; así comparé las políticas desde las mismas posiciones iniciales. En total son 360 episodios. Cada uno termina si se extingue una población o al llegar a 250 pasos. En cada condición apliqué la política elegida tanto a presas como a depredadores; por eso esta comparación mide el efecto de cambiar el control del ecosistema completo, no el efecto aislado de la red de una sola especie. `evidencia/episodios.csv` guarda cada corrida y `evidencia/resumen.csv` presenta los promedios y la variación. El tiempo hasta la primera captura solo se calcula cuando hubo captura.
 
-**Hipótesis:** (H1) el entrenamiento reduce pérdida y aumenta la exactitud al imitar las etiquetas; (H2) una red más ancha aumenta la exactitud de prueba; (H3) las políticas neuronales aumentan supervivencia de presas frente a las referencias aleatorias y de reglas.
+Antes de revisar los resultados planteé tres expectativas: (H1) entrenar reduciría la pérdida y mejoraría la imitación de las etiquetas; (H2) la red más ancha tendría mayor exactitud de prueba; y (H3) las políticas neuronales dejarían más presas vivas que las reglas y el movimiento aleatorio.
 
 ## 4 Resultados
 
@@ -34,7 +40,7 @@ La evaluación del ecosistema usa 30 semillas (1000–1029) por cada combinació
 | Presa | 2,498 | 0,089 | 15,6 % | 97,7 % | 10,318 |
 | Depredador | 2,484 | 0,059 | 14,7 % | 98,7 % | 8,582 |
 
-**Variables controladas:** arquitectura, datos, partición, semilla y tasa; solo cambia el entrenamiento de 120 épocas. **Análisis:** la pérdida bajó y la exactitud subió marcadamente en ambos modelos. **Conclusión:** H1 se apoya para imitación de las etiquetas de prueba. El cambio L2 confirma que los parámetros sí se actualizaron. Esto prueba aprendizaje de la política de referencia, no que la política sea ecológicamente buena.
+En esta comparación mantuve la arquitectura, los datos, la partición, la semilla y la tasa de aprendizaje; la diferencia fue entrenar durante 120 épocas. La pérdida disminuyó y la exactitud de prueba llegó a 97,7 % en presas y 98,7 % en depredadores. También cambió el conjunto de pesos. Estos resultados respaldan H1: las redes aprendieron a imitar las etiquetas. No muestran, por sí solos, que esa conducta sea mejor para el ecosistema.
 
 ### Comparación de arquitecturas
 
@@ -47,7 +53,7 @@ Mismo conjunto de entrenamiento/prueba, semilla, tasa y épocas; solo cambia el 
 | Depredador | 16–12 | 433 | 99,1 % |
 | Depredador | 32–24 | 1.241 | 98,7 % |
 
-**Análisis:** la arquitectura ancha no mejoró de forma relevante la exactitud; en depredadores el modelo pequeño obtuvo mayor exactitud con cerca de un tercio de parámetros. **Conclusión:** H2 no se apoya. Para este conjunto, la arquitectura pequeña parece suficiente; se requiere medir también su desempeño ecológico antes de adoptarla como modelo final.
+La red más grande casi no cambió la exactitud de las presas y obtuvo una exactitud algo menor en depredadores. La versión pequeña usa 433 parámetros, frente a 1.241 en la grande. Con estos datos no se cumple H2. La red pequeña parece suficiente para imitar al experto, aunque todavía faltaría comparar su comportamiento dentro del ecosistema antes de elegirla como modelo final.
 
 ### Comparación de políticas por escenario
 
@@ -96,18 +102,15 @@ Las políticas se compararon sobre las mismas 30 semillas. La diferencia se calc
 | Escasez | 8,20 | 7,51 a 8,89 |
 | Presión | 6,27 | 5,70 a 6,84 |
 
-**Análisis:** la red entrenada y el experto de reglas producen resultados cercanos, coherente con la alta exactitud de imitación. La aleatoria mantiene más presas en los tres escenarios: 8,17 frente a 0,00 en abundancia; 8,20 frente a 0,00 en escasez; y 6,43 frente a 0,17 en presión. En contraste, las políticas entrenadas acumulan más capturas. Las diferencias pareadas por semilla se muestran abajo con intervalos de confianza aproximados del 95 %. **Conclusión:** H3 se rechaza para supervivencia. La red sí modifica las decisiones y aprende la regla de referencia, pero esa imitación no da el mejor balance ecológico. Las energías, duración, causa de finalización y datos por semilla están en los CSV.
+La red entrenada y la regla experta se comportaron de forma parecida, como era esperable por la alta exactitud de imitación. La política aleatoria dejó más presas vivas en los tres escenarios: 8,17 frente a 0,00 en abundancia; 8,20 frente a 0,00 en escasez; y 6,43 frente a 0,17 en presión. La red y las reglas, en cambio, lograron más capturas. Las diferencias entre corridas emparejadas aparecen con intervalos de confianza del 95 %. En `evidencia/graficas/` dejé una gráfica de supervivencia y otra con la pérdida de entrenamiento para ver estos patrones de un vistazo. Con estos resultados rechazo H3 para supervivencia: imitar bien una regla no bastó para lograr un mejor equilibrio. Los archivos CSV permiten consultar las demás métricas y cada episodio.
 
-## 5 Discusión, limitaciones y mejoras
+## 5 Discusión, fallos y mejoras
 
-Los resultados muestran que imitar bien una regla no garantiza supervivencia. Las redes casi replican al experto; la aleatoria, al explorar más, mantiene más presas. Como solo reciben direcciones y energía, las redes ignoran distancias, congestión y obstáculos, posibles explicaciones del resultado.
+El principal problema que mostraron las pruebas no fue que la red dejara de aprender; fue que el entrenamiento solo le pedía imitar las etiquetas del experto. Por eso, obtener 97–99 % de exactitud no se tradujo en más presas vivas: la política aleatoria dejó más presas en los tres escenarios. Las entradas describen direcciones locales y energía, pero no la distancia exacta, la congestión ni las rutas alrededor de obstáculos. Además, cambié a la vez el control de presas y depredadores, así que no puedo atribuir la diferencia a una sola especie.
 
-El entrenamiento usa etiquetas sintéticas y no optimiza directamente la supervivencia; la evaluación tampoco demuestra generalización a otros mapas. El siguiente paso es añadir percepción del entorno y ejemplos con penalización de colisiones, y repetir las mismas semillas para comprobar el efecto.
+El entrenamiento usa ejemplos sintéticos y busca acertar la etiqueta del experto; no optimiza directamente la supervivencia ni demuestra que la red funcione igual en mapas distintos. Como siguiente paso propongo probar cada especie por separado, añadir información sobre obstáculos y distancia, y comparar de nuevo con las mismas semillas. Los archivos finales no incluyen una comparación entre distintos valores de energía; por eso no puedo afirmar que los parámetros elegidos sean óptimos.
 ## 6 Reproducibilidad y uso de IA
 
-Instalación y ejecución: instrucciones en `README.md`. Las semillas, parámetros, datos episodio a episodio y pesos están incluidos. Para recrear modelos y evidencia, ejecutar `python -m neurito_ecosistema.experimentos` desde esta carpeta. La evidencia fue generada con Python 3.12 y NumPy del entorno del proyecto de clase.
+El proyecto se puede ejecutar con las instrucciones del `README.md`. Incluí las semillas, los parámetros, los resultados por episodio y los pesos finales. Para volver a entrenar las redes y generar la evidencia, se ejecuta `python -m neurito_ecosistema.experimentos` desde la carpeta del proyecto. Las corridas que acompañan este informe se hicieron con Python 3.12 y NumPy.
 
-Se utilizó un asistente de programación para organizar código, documentación y análisis inicial. El equipo debe revisar y explicar el MLP, la retropropagación, las reglas que generan etiquetas y los resultados antes de la sustentación; debe declarar cambios que acepte o rechace y repetir las ejecuciones en su propio entorno.
-
-
-
+Usé Codex para organizar el código, redactar la documentación y ordenar el análisis. Acepté su ayuda para organizar las tablas y comparar las políticas; no presenté la exactitud de imitación como prueba de que la red fuera mejor en el ecosistema. Contrasté las cifras con los CSV y con `training_summary.json`. La conclusión sobre supervivencia sigue lo que muestran las corridas. Soy responsable de entender y explicar la red, el entrenamiento, los resultados y sus límites.
