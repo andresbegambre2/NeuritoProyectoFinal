@@ -13,7 +13,7 @@ def main():
     nets={'prey':load_model(models/'prey_model.npz'),'predator':load_model(models/'predator_model.npz')}
     pygame.init(); screen=pygame.display.set_mode((PAD*2+24*CELL+SIDE,PAD*2+24*CELL));pygame.display.set_caption('Neurito | NeuroEcosistema')
     font=pygame.font.SysFont('segoeui',17);small=pygame.font.SysFont('segoeui',14)
-    scenario='abundancia'; policy_name='Neuronal'; world=World(2026,scenario);tick=0;paused=True
+    scenario='abundancia'; policy_name='Neuronal'; world=World(2026,scenario);paused=True
     clock=pygame.time.Clock(); running=True
     def policies():
         if policy_name=='Aleatoria':
@@ -26,11 +26,11 @@ def main():
             if e.type==pygame.KEYDOWN:
                 if e.key==pygame.K_ESCAPE:running=False
                 elif e.key==pygame.K_SPACE:paused=not paused
-                elif e.key==pygame.K_n:scenario={'abundancia':'escasez','escasez':'presion','presion':'abundancia'}[scenario];world=World(2026+tick,scenario);tick=0
+                elif e.key==pygame.K_n:scenario={'abundancia':'escasez','escasez':'presion','presion':'abundancia'}[scenario];world=World(2026+world.tick,scenario)
                 elif e.key==pygame.K_p:policy_name={'Neuronal':'Aleatoria','Aleatoria':'Reglas'}[policy_name] if policy_name!='Reglas' else 'Neuronal'
-                elif e.key==pygame.K_r:world=World(2026,scenario);tick=0
-                elif e.key==pygame.K_RIGHT and paused:world.step(policies(),1);tick+=1
-        if not paused:world.step(policies(),1);tick+=1
+                elif e.key==pygame.K_r:world=World(2026,scenario)
+                elif e.key==pygame.K_RIGHT and paused:world.step(policies(),1)
+        if not paused:world.step(policies(),1)
         screen.fill((20,27,38)); ox=PAD;oy=PAD
         pygame.draw.rect(screen,(36,47,62),(ox,oy,24*CELL,24*CELL))
         for x,y in world.obstacles:pygame.draw.rect(screen,(91,102,113),(ox+x*CELL,oy+y*CELL,CELL-1,CELL-1))
@@ -39,7 +39,7 @@ def main():
         for (x,y),energy in world.predators.items():pygame.draw.circle(screen,(245,89,83),(ox+x*CELL+CELL//2,oy+y*CELL+CELL//2),max(5,int(9*energy)))
         px=ox+24*CELL+20; y=PAD
         title=font.render('NEURITO · NEUROECOSISTEMA',True,(238,242,248));screen.blit(title,(px,y));y+=38
-        info=[f'Escenario: {scenario}',f'Política: {policy_name}',f'Paso: {tick}/{world.max_steps}',f'Estado: {world.termination_reason or "en curso"}',f'Presas vivas: {len(world.prey)}',f'Depredadores: {len(world.predators)}',f'Alimento consumido: {world.consumed}',f'Capturas: {world.captures}',f'Energía media presas: {sum(world.prey.values())/max(1,len(world.prey)):.2f}','', 'ESPACIO iniciar/pausar','→ un paso (pausado)','N cambiar escenario','P alternar política','R reiniciar','ESC salir','','Verde alimento · Azul presa','Rojo depredador · Gris obstáculo']
+        info=[f'Escenario: {scenario}',f'Política: {policy_name}',f'Paso: {world.tick}/{world.max_steps}',f'Estado: {world.termination_reason or "en curso"}',f'Presas vivas: {len(world.prey)}',f'Depredadores: {len(world.predators)}',f'Alimento consumido: {world.consumed}',f'Capturas: {world.captures}',f'Energía media presas: {sum(world.prey.values())/max(1,len(world.prey)):.2f}','', 'ESPACIO iniciar/pausar','→ un paso (pausado)','N cambiar escenario','P alternar política','R reiniciar','ESC salir','','Verde alimento · Azul presa','Rojo depredador · Gris obstáculo']
         for line in info:screen.blit(small.render(line,True,(211,221,233)),(px,y));y+=23
         if world.prey:
             pos=next(iter(world.prey));x=features(world,'prey',pos,world.prey[pos]);act=int(nets['prey'].predict(x[None,:])[0]); labels=['↖','↑','↗','←','•','→','↙','↓','↘']

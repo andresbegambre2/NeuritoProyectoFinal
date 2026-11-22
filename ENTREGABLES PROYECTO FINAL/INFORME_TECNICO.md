@@ -1,4 +1,4 @@
-# Informe técnico NeuroEcosistema: simulación de presas y depredadores
+# Informe técnico del NeuroEcosistema de presas y depredadores
 
 **Universidad Santo Tomás, seccional Tunja · Electiva I de Profundización – Inteligencia Artificial**
 
@@ -9,6 +9,7 @@
 **Proyecto:** simulación de depredadores y presas
 
 **Fecha de generación de evidencia:** 20 de noviembre de 2026
+
 En este trabajo construí una simulación de presas y depredadores y la comparé en 360 episodios. La red aprendió a imitar la regla experta. En mis pruebas la política aleatoria dejó más presas vivas. Por eso no concluyo que la red haya mejorado la supervivencia. En este informe explico qué medí, qué encontré y qué aspectos todavía limitan el modelo.
 
 ## 1 Problema y objetivo
@@ -113,4 +114,4 @@ El entrenamiento usa ejemplos sintéticos y busca acertar la etiqueta del expert
 
 El proyecto se puede ejecutar con las instrucciones del `README.md`. Incluí las semillas, los parámetros, los resultados por episodio y los pesos finales. Para volver a entrenar las redes y generar la evidencia, se ejecuta `python -m neurito_ecosistema.experimentos` desde la carpeta del proyecto. Las corridas que acompañan este informe se hicieron con Python 3.12 y NumPy.
 
-Usé Codex para organizar el código, redactar la documentación y ordenar el análisis. Acepté su ayuda para organizar las tablas y comparar las políticas; no presenté la exactitud de imitación como prueba de que la red fuera mejor en el ecosistema. Contrasté las cifras con los CSV y con `training_summary.json`. La conclusión sobre supervivencia sigue lo que muestran las corridas. Soy responsable de entender y explicar la red, el entrenamiento, los resultados y sus límites.
+Desarrollé el proyecto con apoyo de Codex, un asistente de programación. Lo usé para revisar y completar parte del código, organizar las pruebas y preparar la documentación. Yo revisé la propuesta y ejecuté la aplicación en mi computador. Acepté ayuda para organizar la comparación de políticas; no tomé la exactitud de imitación como prueba de que la red mejorara la supervivencia, porque los resultados muestran lo contrario. Las cifras del informe se contrastaron con `evidencia/episodios.csv`, `evidencia/resumen.csv` y `modelos/training_summary.json`. Yo presento y respondo por las decisiones del proyecto; por eso debo poder explicar cómo funciona el entrenamiento y qué muestran sus resultados.

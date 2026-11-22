@@ -11,7 +11,7 @@ Revisé los requisitos de la propuesta frente al código, los modelos y la evide
 | Comparación antes/después, entre configuraciones y frente a una referencia | Informe, `evidencia/resumen.csv`, `evidencia/resumen.json` | Incluida; la comparación de arquitectura mide exactitud de imitación, no rendimiento ecológico |
 | Tres escenarios y varias ejecuciones con semillas | `evidencia/episodios.csv` | 30 semillas por política y escenario, 360 episodios |
 | Métricas y datos que permitan revisar las conclusiones | CSV, JSON y gráficas en `evidencia/` | Incluidos; supervivencia, alimento, capturas, energía, duración y variación |
-| Aplicación visible con controles y variables | `../neurito_ecosistema/visualizar.py` | Andrés confirma que ya la ejecutó en su computador; se debe volver a abrir en el equipo de sustentación |
+| Aplicación visible con controles y variables | `../neurito_ecosistema/visualizar.py` | El autor confirmó que ya la ejecutó en su computador; debe volver a abrirla para la sustentación |
 | Instrucciones y dependencias | `../README.md` y `../requirements.txt` | Incluidas |
 | Bitácora con seis o más decisiones | `BITACORA_DECISIONES.md` | Incluye nueve decisiones y sus alternativas |
 | Informe de hasta diez páginas con análisis, límites y recomendaciones | `INFORME_TECNICO.docx` y PDF | Incluido; cuatro páginas, dentro del máximo de diez. Se revisó el PDF después de actualizarlo |
@@ -29,4 +29,4 @@ La red entrenada imita bien la regla experta y produce muchas capturas. Aun así
 - La comparación de las dos arquitecturas mide exactitud de imitación. Su rendimiento ecológico aún no se comparó.
 - No hay en el repositorio una comparación de sensibilidad para justificar los valores de gasto de energía y regeneración frente a otras opciones. Se describen como parámetros usados, no como valores óptimos.
 - La sustentación y las preguntas individuales no se pueden marcar como realizadas hasta que ocurran.
-- La versión final de Word y PDF debe abrirse y revisarse visualmente después de los cambios.
+- El Word y el PDF finales se revisaron visualmente; el informe tiene cuatro páginas y está dentro del límite de diez.

@@ -1,58 +1,58 @@
 # NeuroEcosistema Neurito
 
-Simulador 2D de presas y depredadores con dos redes neuronales multicapa entrenadas por aprendizaje supervisado. Reutiliza conceptos trabajados en clase: MLP en NumPy, ReLU, Softmax, retropropagación, Pygame y experimentación reproducible.
+Este proyecto simula presas y depredadores en un tablero de 24 × 24. Cada población puede moverse con una red neuronal, una regla fija o una política aleatoria. La idea fue comparar esas opciones en distintos escenarios y guardar resultados que permitan revisar las conclusiones.
 
-## Requisitos y ejecución
+## Ejecutar en Windows
 
-- Python 3.12 o superior
-- NumPy 2.x
-- Pygame CE 2.x (para la vista)
-
-Desde esta carpeta en Windows:
+Abre PowerShell en la carpeta principal del repositorio: es la que contiene `requirements.txt`, `INICIAR_SIMULACION.bat` y `neurito_ecosistema/`. Ejecuta:
 
 ```powershell
 python -m pip install -r requirements.txt
 python -m neurito_ecosistema.visualizar
 ```
 
-La vista carga los modelos ya incluidos. Para volver a entrenar los modelos y regenerar los experimentos:
+La ventana aparece pausada. Para iniciarla, presiona **Espacio**. Si ya están instaladas las dependencias, también puedes abrir `INICIAR_SIMULACION.bat`.
+
+Para volver a entrenar las redes y regenerar los experimentos, ejecuta:
 
 ```powershell
 python -m neurito_ecosistema.experimentos
 ```
 
-## Diseño del ecosistema
+Esto vuelve a guardar los modelos y los archivos de `evidencia/`. No hace falta correrlo para mostrar la aplicación: los modelos y los resultados actuales ya están incluidos.
 
-El tablero es una cuadrícula de 24×24 con 12 presas iniciales. Hay tres escenarios: abundancia (22 alimentos, 2 depredadores, sin obstáculos), escasez (7 alimentos, 2 depredadores) y presión (16 alimentos, 5 depredadores y 18 obstáculos). El alimento se regenera; los agentes consumen energía y la recuperan al comer o capturar. Los episodios terminan si se extingue una especie o al alcanzar el límite de 250 pasos.
+## Cómo está hecha la simulación
 
-Cada especie usa una MLP 6→32→24→9, con dos capas ocultas ReLU y salida Softmax. Las entradas codifican direcciones al objetivo principal y secundario, energía y disponibilidad del objetivo. Las salidas representan ocho movimientos posibles y quedarse quieto. En la política neuronal, la acción se escoge con el valor más alto de salida de la red.
+Cada episodio empieza con 12 presas. Se puede cambiar entre tres escenarios: abundancia (22 alimentos y 2 depredadores), escasez (7 alimentos y 2 depredadores) y presión (16 alimentos, 5 depredadores y 18 obstáculos). Las poblaciones consumen energía al moverse y la recuperan al comer o capturar. Un episodio termina cuando se extingue una población o llega al máximo de 250 pasos.
 
-El entrenamiento es supervisado por imitación: una regla vectorial genera etiquetas y la red aprende con entropía cruzada y retropropagación por mini lotes. No es aprendizaje por refuerzo. La política de reglas es tanto referencia como fuente de las etiquetas; la aleatoria es una referencia independiente.
+Hay una red neuronal MLP para cada especie. Cada red tiene dos capas ocultas, usa ReLU y Softmax, y selecciona una de nueve acciones: ocho movimientos o quedarse quieta. Las entradas representan direcciones hacia objetivos cercanos, energía y disponibilidad de objetivos. En el modelo de depredador se incluye una dirección hacia el alimento, aunque la regla usada para generar las etiquetas de entrenamiento no aprovecha esa entrada; es una limitación que se explica en el informe.
 
-## Experimentos reproducibles
+El entrenamiento es supervisado: las redes aprenden a imitar las decisiones de una regla vectorial. No es aprendizaje por refuerzo. Por eso, una exactitud alta muestra que la red aprendió a copiar esa regla, pero no demuestra por sí misma que el ecosistema mejore.
 
-Se comparan cuatro políticas: red entrenada, la misma red antes del entrenamiento, reglas y movimiento aleatorio. Hay 3 escenarios × 4 políticas × 30 semillas = **360 episodios**. Las semillas 1000–1029 emparejan las posiciones iniciales entre políticas. Cada episodio dura hasta 250 pasos o termina por extinción de una especie.
+## Qué se comparó
 
-Se registran supervivientes, alimento consumido, capturas, energía final de presas y depredadores, duración, motivo de terminación y tiempo hasta la primera captura. Para el tiempo a la primera captura, los promedios consideran solo episodios donde ocurrió al menos una captura; en los demás queda vacío, no cero. Los CSV contienen resultados por episodio, promedios y desviaciones estándar.
+Los experimentos prueban cuatro políticas: red entrenada, la misma red antes de entrenar, reglas y movimiento aleatorio. Cada política se aplica tanto a las presas como a los depredadores. Se hicieron 30 repeticiones por política y escenario, con semillas emparejadas de 1000 a 1029: 360 episodios en total. Se registraron presas supervivientes, alimento consumido, capturas, energía, duración y motivo de finalización.
 
-La comparación de arquitecturas (16–12 y 32–24 neuronas ocultas) usa los mismos datos, semillas, tasa y épocas. Los resultados son descriptivos de este modelo y estas semillas. Alta exactitud al imitar reglas no demuestra por sí sola un mejor desempeño ecológico.
+En estos resultados, la política aleatoria dejó más presas vivas en los tres escenarios. La red entrenada se pareció a la regla experta y logró más capturas. No se presenta la red como superior en supervivencia: los datos no muestran eso. El informe también explica que, al cambiar la política de las dos especies a la vez, no se puede aislar cuál de ellas produjo la diferencia.
 
-## Vista interactiva
+## Controles de la ventana
 
-`visualizar.py` abre Pygame. ESPACIO inicia o pausa; flecha derecha avanza un paso pausado; N cambia escenario; P alterna entre política neuronal, aleatoria y reglas; R reinicia la misma semilla; ESC sale. El panel muestra las poblaciones, alimento consumido, capturas, energía de presas y estado de episodio.
+- **Espacio:** iniciar o pausar.
+- **Flecha derecha:** avanzar un paso mientras está pausada.
+- **N:** cambiar de escenario.
+- **P:** alternar entre política neuronal, aleatoria y de reglas.
+- **R:** reiniciar el escenario.
+- **Esc:** salir.
 
-## Archivos de entrega
+## Archivos principales
 
-- `neurito_ecosistema/`: entorno, MLP, entrenamiento, experimentos y vista.
+- `neurito_ecosistema/`: simulación, redes, entrenamiento, experimentos y ventana gráfica.
 - `modelos/`: pesos entrenados y resumen del entrenamiento.
-- `evidencia/`: episodios individuales y resúmenes experimentales.
-- `INFORME_TECNICO.docx` y `INFORME_TECNICO.pdf`: informe.
-- `INFORME_TECNICO.md`: fuente editable del informe.
-- `BITACORA_DECISIONES.md`: decisiones justificadas.
-- `AUDITORIA_PROPUESTA.md`: revisión requisito por requisito y puntos pendientes para la sustentación.
-- `ENTREGABLES PROYECTO FINAL/`: copia organizada de los documentos y evidencia para revisar o entregar.
-- `INICIAR_SIMULACION.bat` y `GENERAR_EVIDENCIA.bat`: accesos rápidos para Windows.
+- `evidencia/`: datos de cada episodio, resúmenes y gráficas.
+- `ENTREGABLES PROYECTO FINAL/`: informe, bitácora, auditoría y copia organizada de los resultados.
 
-## Uso de IA
+El informe tiene cuatro páginas. La bitácora documenta nueve decisiones técnicas. Los CSV permiten consultar los resultados por episodio y sus resúmenes.
 
-Usé Codex como apoyo para organizar el código, la documentación y el análisis. En el informe explico qué ayuda acepté, qué interpretación no adopté porque los datos no la respaldan y cómo contrasté las cifras con la evidencia guardada.
+## Apoyo de programación
+
+Desarrollé el proyecto con apoyo de Codex, un asistente de programación. Lo usé para revisar y completar parte del código, organizar las pruebas y preparar la documentación. Yo revisé la propuesta y ejecuté la aplicación en mi computador. Acepté ayuda para organizar la comparación de políticas; no tomé la exactitud de imitación como prueba de que la red mejorara la supervivencia, porque los resultados muestran lo contrario. Las cifras del informe se contrastaron con los CSV y el resumen de entrenamiento. Debo poder explicar las decisiones, los resultados y las limitaciones durante la sustentación.
